@@ -8,9 +8,11 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , client(Q_NULLPTR)
 {
     srand(time(0));
 
@@ -36,14 +38,15 @@ void MainWindow::createInterior()
     QWidget *subWgt = new QWidget(wgt);
 
     setCentralWidget(wgt);
+    setMinimumSize(480, 420);
 
     QGridLayout *grid = new QGridLayout(wgt);
     QGridLayout *subGrid = new QGridLayout(subWgt);
 
     subGrid->setMargin(0);
 
-    QLabel *serverAddressLabel = new QLabel(tr("Host:"), subWgt);
-    QLabel *nickNameLabel = new QLabel(tr("Nickname:"), subWgt);
+    QLabel *serverAddressLabel = new QLabel(tr("&Host:"), subWgt);
+    QLabel *nickNameLabel = new QLabel(tr("&Nickname:"), subWgt);
     QPushButton *changeHostBtn = new QPushButton(tr("(Re-)Connect"), subWgt);
     QPushButton *changeNickNameBtn = new QPushButton(tr("Set nickname"), subWgt);
 
@@ -54,6 +57,11 @@ void MainWindow::createInterior()
 
     userListWgt = new QListView(wgt);
 
+    inputWgt->setFocus();
+
+    serverAddressLabel->setBuddy(serverAddressWgt);
+    nickNameLabel->setBuddy(nickNameWgt);
+    chatWgt->setReadOnly(true);
     userListWgt->setMaximumWidth(160);
 
     subGrid->addWidget(serverAddressLabel, 0, 0);
@@ -68,4 +76,44 @@ void MainWindow::createInterior()
 
     grid->addWidget(subWgt, 0, 0);
     grid->addWidget(userListWgt, 0, 1);
+
+    connect(changeHostBtn, &QPushButton::clicked, this, &MainWindow::changeHost);
+    connect(changeNickNameBtn, &QPushButton::clicked, this, &MainWindow::changeNickName);
+    connect(serverAddressWgt, SIGNAL(returnPressed()), changeHostBtn, SIGNAL(clicked()));
+    connect(nickNameWgt, SIGNAL(returnPressed()), changeNickNameBtn, SIGNAL(clicked()));
+}
+
+void MainWindow::changeHost()
+{
+    if(client)
+    {
+        client->shutdown();
+        delete client;
+        client = Q_NULLPTR;
+    }
+
+    QString v = serverAddressWgt->text();
+    if(!v.length())
+    {
+        QMessageBox::warning(this, tr("Error"), tr("Address value cannot be empty"));
+        return;
+    }
+
+    QString addr = v;
+    uint16_t port = DEFAULT_PORT;
+
+    if(v.contains(':'))
+    {
+        QStringList s = v.split(':');
+        addr = s[0];
+        port = s[1].toUShort();
+    }
+
+    client = new Client(addr, port, this);
+    inputWgt->setFocus();
+}
+
+void MainWindow::changeNickName()
+{
+    inputWgt->setFocus();
 }

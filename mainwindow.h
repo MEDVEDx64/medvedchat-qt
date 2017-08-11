@@ -6,6 +6,8 @@
 #include <QTextEdit>
 #include <QListView>
 
+#include "client.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -18,9 +20,15 @@ class MainWindow : public QMainWindow
     QListView *userListWgt;
     QLineEdit *inputWgt;
 
+    Client *client;
+
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+private slots:
+    void changeHost();
+    void changeNickName();
 };
 
 #endif // MAINWINDOW_H
