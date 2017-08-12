@@ -1,1 +1,5 @@
 *.user
+moc_*
+*.o
+Makefile
+medvedchat-qt
