@@ -7,7 +7,7 @@ Client::Client(QString host, uint16_t port, QObject *parent): QObject(parent)
 {
     connect(socket, &QAbstractSocket::connected, this, &Client::login);
     connect(socket, &QAbstractSocket::readyRead, this, &Client::fetch);
-    connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::handleError);
+    connect(socket, static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error), this, &Client::handleError);
 
     socket->connectToHost(host, port);
 }
