@@ -50,7 +50,7 @@ void MainWindow::createInterior()
     QPushButton *changeHostBtn = new QPushButton(tr("(Re-)Connect"), subWgt);
     QPushButton *changeNickNameBtn = new QPushButton(tr("Set nickname"), subWgt);
 
-    serverAddressWgt = new QLineEdit("themassacre.org", subWgt);
+    serverAddressWgt = new QLineEdit("localhost", subWgt);
     nickNameWgt = new QLineEdit(makeRandomNickName(), subWgt);
     chatWgt = new QTextEdit(subWgt);
     inputWgt = new QLineEdit(subWgt);
@@ -81,6 +81,7 @@ void MainWindow::createInterior()
     connect(changeNickNameBtn, &QPushButton::clicked, this, &MainWindow::changeNickName);
     connect(serverAddressWgt, SIGNAL(returnPressed()), changeHostBtn, SIGNAL(clicked()));
     connect(nickNameWgt, SIGNAL(returnPressed()), changeNickNameBtn, SIGNAL(clicked()));
+    connect(inputWgt, &QLineEdit::returnPressed, this, &MainWindow::sendMessage);
 }
 
 void MainWindow::changeHost()
@@ -109,7 +110,13 @@ void MainWindow::changeHost()
         port = s[1].toUShort();
     }
 
+    printInternalMessage(tr("Connecting to host ") + addr + ":" + QString::number(port));
     client = new Client(addr, port, nickNameWgt->text(), this);
+
+    connect(client, &Client::incomingPacket, this, &MainWindow::handlePacket);
+    connect(client, &Client::disconnected, this, &MainWindow::handleDisconnection);
+    connect(client, &Client::error, this, &MainWindow::handleError);
+
     inputWgt->setFocus();
 }
 
@@ -121,4 +128,79 @@ void MainWindow::changeNickName()
     }
 
     inputWgt->setFocus();
+}
+
+void MainWindow::handlePacket(RawPacket *pkt)
+{
+    if(pkt->header.type != PL_TEXT) return;
+    QString text = getPacketText(pkt);
+
+    switch (pkt->header.command) {
+    case SRV_NOTIFICATION:
+        printHtml("<x style=\"color: #028\">** " + text + "</x>");
+        break;
+
+    case SRV_TEXT:
+        if(text.contains('\n'))
+        {
+            QStringList s = text.split('\n');
+            printHtml("<b>" + s[0] + ":</b> " + s[1]);
+        }
+
+        break;
+
+    case SRV_USERLIST:
+        break;
+
+    default:
+        break;
+    }
+}
+
+void MainWindow::sendMessage()
+{
+    if(client == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString text = inputWgt->text();
+    if(text.length() == 0)
+    {
+        return;
+    }
+
+    inputWgt->setText("");
+
+    RawPacket *pkt = createPacket();
+    pkt->header.command = CLI_NO_ACTION;
+    setPacketText(pkt, text);
+
+    client->sendPacket(pkt);
+    destroyPacket(&pkt);
+}
+
+void MainWindow::printHtml(QString html)
+{
+    chatWgt->insertHtml(html + "<br>");
+}
+
+void MainWindow::printInternalMessage(QString text)
+{
+    printHtml("<i style=\"color: #282\">" + text + "</i>");
+}
+
+void MainWindow::printInternalError(QString text)
+{
+    printHtml("<i style=\"color: #820\">" + text + "</i>");
+}
+
+void MainWindow::handleDisconnection()
+{
+    printInternalMessage(tr("Disconnected."));
+}
+
+void MainWindow::handleError(QString text)
+{
+    printInternalError(text);
 }

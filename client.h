@@ -17,6 +17,7 @@ public:
     explicit Client(QString host, uint16_t port, QString nickName, QObject *parent = 0);
 
     void setNickname(QString nickName);
+    void sendPacket(RawPacket *pkt);
     void shutdown();
 
 private:
@@ -26,6 +27,8 @@ private:
 
 signals:
     void incomingPacket(RawPacket *pkt);
+    void disconnected();
+    void error(QString text);
 
 private slots:
     void login();

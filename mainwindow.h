@@ -29,6 +29,16 @@ public:
 private slots:
     void changeHost();
     void changeNickName();
+    void sendMessage();
+
+    void handlePacket(RawPacket *pkt);
+    void handleDisconnection();
+    void handleError(QString text);
+
+private:
+    void printHtml(QString html);
+    void printInternalMessage(QString text);
+    void printInternalError(QString text);
 };
 
 #endif // MAINWINDOW_H
