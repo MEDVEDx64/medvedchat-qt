@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include <QString>
+
 #define MAX_PAYLOAD_SIZE 0x10000
 #define FLIP16(v) ((v >> 8) | ((v&0xff) << 8))
 
@@ -21,10 +23,12 @@
 #define PL_TEXT                 1
 #define PL_SHIT                 0
 
+#pragma pack(push,1)
+
 typedef struct
 {
-    unsigned int command: 7;
-    unsigned int type: 1;
+    uint8_t type: 1;
+    uint8_t command: 7;
     uint16_t length_be;
 }
 RawPacketHeader;
@@ -36,10 +40,13 @@ typedef struct
 }
 RawPacket;
 
-class AbstractMessage
-{
-public:
-    AbstractMessage(RawPacket raw);
-};
+#pragma pack(pop)
+
+RawPacket *createPacket();
+void destroyPacket(RawPacket **pkt);
+uint32_t getPacketLength(RawPacket *pkt);
+
+QString getPacketText(RawPacket *pkt);
+void setPacketText(RawPacket *pkt, QString text);
 
 #endif // PROTOCOL_H

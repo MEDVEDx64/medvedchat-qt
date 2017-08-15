@@ -14,16 +14,18 @@ class Client : public QObject
     Q_OBJECT
 
 public:
-    explicit Client(QString host, uint16_t port, QObject *parent = 0);
+    explicit Client(QString host, uint16_t port, QString nickName, QObject *parent = 0);
 
+    void setNickname(QString nickName);
     void shutdown();
 
 private:
+    QString nickName;
     QTcpSocket *socket;
     RawPacket buffer;
 
 signals:
-    void incomingMessage(AbstractMessage msg);
+    void incomingPacket(RawPacket *pkt);
 
 private slots:
     void login();

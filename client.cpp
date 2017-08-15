@@ -1,9 +1,13 @@
 #include "client.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include <QMessageBox>
 
-Client::Client(QString host, uint16_t port, QObject *parent): QObject(parent)
+Client::Client(QString host, uint16_t port, QString nickName, QObject *parent): QObject(parent)
   , socket(new QTcpSocket(this))
+  , nickName(nickName)
 {
     connect(socket, &QAbstractSocket::connected, this, &Client::login);
     connect(socket, &QAbstractSocket::readyRead, this, &Client::fetch);
@@ -12,8 +16,21 @@ Client::Client(QString host, uint16_t port, QObject *parent): QObject(parent)
     socket->connectToHost(host, port);
 }
 
+void Client::setNickname(QString nickName)
+{
+    this->nickName = nickName;
+    login();
+}
+
 void Client::login()
 {
+    RawPacket *pkt = createPacket();
+    pkt->header.command = CLI_LOGIN;
+    setPacketText(pkt, nickName);
+
+    socket->write((char*)pkt, getPacketLength(pkt));
+
+    destroyPacket(&pkt);
 }
 
 void Client::fetch()

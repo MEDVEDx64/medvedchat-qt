@@ -109,11 +109,16 @@ void MainWindow::changeHost()
         port = s[1].toUShort();
     }
 
-    client = new Client(addr, port, this);
+    client = new Client(addr, port, nickNameWgt->text(), this);
     inputWgt->setFocus();
 }
 
 void MainWindow::changeNickName()
 {
+    if(client != Q_NULLPTR)
+    {
+        client->setNickname(nickNameWgt->text());
+    }
+
     inputWgt->setFocus();
 }

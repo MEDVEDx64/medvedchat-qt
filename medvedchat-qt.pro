@@ -14,7 +14,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    client.cpp
+    client.cpp \
+    protocol.cpp
 
 HEADERS  += mainwindow.h \
     client.h \
