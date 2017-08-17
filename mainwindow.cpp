@@ -110,7 +110,7 @@ void MainWindow::changeHost()
         port = s[1].toUShort();
     }
 
-    printInternalMessage(tr("Connecting to host ") + addr + ":" + QString::number(port));
+    printNotification(tr("Connecting to host ") + addr + ":" + QString::number(port), NSTYLE_INTERNAL);
     client = new Client(addr, port, nickNameWgt->text(), this);
 
     connect(client, &Client::incomingPacket, this, &MainWindow::handlePacket);
@@ -137,14 +137,14 @@ void MainWindow::handlePacket(RawPacket *pkt)
 
     switch (pkt->header.command) {
     case SRV_NOTIFICATION:
-        printHtml("<x style=\"color: #028\">** " + text + "</x>");
+        printNotification(text, NSTYLE_REMOTE);
         break;
 
     case SRV_TEXT:
         if(text.contains('\n'))
         {
             QStringList s = text.split('\n');
-            printHtml("<b>" + s[0] + ":</b> " + s[1]);
+            printMessage(s[1], s[0], false);
         }
 
         break;
@@ -180,27 +180,52 @@ void MainWindow::sendMessage()
     destroyPacket(&pkt);
 }
 
-void MainWindow::printHtml(QString html)
+void MainWindow::moveTextCursorToEnd()
 {
-    chatWgt->insertHtml(html + "<br>");
+    QTextCursor cursor = chatWgt->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    chatWgt->setTextCursor(cursor);
 }
 
-void MainWindow::printInternalMessage(QString text)
+void MainWindow::printNotification(QString text, int style)
 {
-    printHtml("<i style=\"color: #282\">" + text + "</i>");
+    QString prefix = style == NSTYLE_REMOTE ? "<x style=\"color: #028\">** "
+            : style == NSTYLE_INTERNAL ? "<i style=\"color: #282\">"
+            : style == NSTYLE_INTERNAL_ERR ? "<i style=\"color: #820\">" : "";
+    QString postfix = style == NSTYLE_REMOTE ? "</x>"
+            : (style == NSTYLE_INTERNAL || style == NSTYLE_INTERNAL_ERR) ? "</i>" : "";
+
+    moveTextCursorToEnd();
+    chatWgt->insertHtml(prefix + text.toHtmlEscaped() + postfix + "<br>\n");
+    moveTextCursorToEnd();
 }
 
-void MainWindow::printInternalError(QString text)
+void MainWindow::printMessage(QString text, QString sender, bool isPrivate)
 {
-    printHtml("<i style=\"color: #820\">" + text + "</i>");
+    moveTextCursorToEnd();
+
+    if(isPrivate)
+    {
+        chatWgt->insertHtml("<i style=\"color: #444\">");
+    }
+
+    chatWgt->insertHtml("<b>" + sender.toHtmlEscaped() + ":</b> " + text.toHtmlEscaped());
+
+    if(isPrivate)
+    {
+        chatWgt->insertHtml("</i>");
+    }
+
+    chatWgt->insertHtml("<br>\n");
+    moveTextCursorToEnd();
 }
 
 void MainWindow::handleDisconnection()
 {
-    printInternalMessage(tr("Disconnected."));
+    printNotification(tr("Disconnected."), NSTYLE_INTERNAL);
 }
 
 void MainWindow::handleError(QString text)
 {
-    printInternalError(text);
+    printNotification(text, NSTYLE_INTERNAL_ERR);
 }

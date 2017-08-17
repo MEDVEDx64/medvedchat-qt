@@ -7,7 +7,7 @@
 
 #include <QString>
 
-#define MAX_PAYLOAD_SIZE 0x10000
+#define MAX_PAYLOAD_SIZE 0xffff
 #define FLIP16(v) ((v >> 8) | ((v&0xff) << 8))
 
 // Commands

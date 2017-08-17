@@ -8,6 +8,10 @@
 
 #include "client.h"
 
+#define NSTYLE_REMOTE           1
+#define NSTYLE_INTERNAL         2
+#define NSTYLE_INTERNAL_ERR     3
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -35,10 +39,11 @@ private slots:
     void handleDisconnection();
     void handleError(QString text);
 
+    void moveTextCursorToEnd();
+
 private:
-    void printHtml(QString html);
-    void printInternalMessage(QString text);
-    void printInternalError(QString text);
+    void printNotification(QString text, int style);
+    void printMessage(QString text, QString sender, bool isPrivate);
 };
 
 #endif // MAINWINDOW_H

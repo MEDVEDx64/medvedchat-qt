@@ -37,9 +37,12 @@ void Client::login()
 void Client::fetch()
 {
     memset(&buffer, 0, sizeof(buffer));
+    socket->read((char*)&buffer, sizeof(buffer));
 
-    socket->read((char*)&buffer, sizeof(buffer.header));
-    socket->read((char*)buffer.payload, FLIP16(buffer.header.length_be));
+    // trimming unwanted overflow data if any
+    uint16_t len = FLIP16(buffer.header.length_be);
+    if(len == sizeof(buffer.payload)) len--;
+    buffer.payload[len] = 0;
 
     emit incomingPacket(&buffer);
 }
