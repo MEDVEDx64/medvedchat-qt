@@ -36,15 +36,15 @@ void Client::login()
 
 void Client::fetch()
 {
-    memset(&buffer, 0, sizeof(buffer));
-    socket->read((char*)&buffer, sizeof(buffer));
+    while(true)
+    {
+        memset(&buffer, 0, sizeof(buffer));
+        qint64 r = socket->read((char*)&buffer, sizeof(buffer.header));
+        r |= socket->read(buffer.payload, FLIP16(buffer.header.length_be));
+        if(!r) break;
 
-    // trimming unwanted overflow data if any
-    uint16_t len = FLIP16(buffer.header.length_be);
-    if(len == sizeof(buffer.payload)) len--;
-    buffer.payload[len] = 0;
-
-    emit incomingPacket(&buffer);
+        emit incomingPacket(&buffer);
+    }
 }
 
 void Client::handleError(QAbstractSocket::SocketError err)
