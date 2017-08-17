@@ -55,7 +55,7 @@ void MainWindow::createInterior()
     chatWgt = new QTextEdit(subWgt);
     inputWgt = new QLineEdit(subWgt);
 
-    userListWgt = new QListView(wgt);
+    userListWgt = new QListWidget(wgt);
 
     inputWgt->setFocus();
 
@@ -149,8 +149,17 @@ void MainWindow::handlePacket(RawPacket *pkt)
 
         break;
 
-    case SRV_USERLIST:
+    case SRV_USERLIST: {
+        userListWgt->clear();
+
+        QStringList names = text.split('\n');
+        for(int i = 0; i < names.length(); i++)
+        {
+            userListWgt->insertItem(i, names[i]);
+        }
+
         break;
+    }
 
     default:
         break;
@@ -222,10 +231,12 @@ void MainWindow::printMessage(QString text, QString sender, bool isPrivate)
 
 void MainWindow::handleDisconnection()
 {
+    userListWgt->clear();
     printNotification(tr("Disconnected."), NSTYLE_INTERNAL);
 }
 
 void MainWindow::handleError(QString text)
 {
+    userListWgt->clear();
     printNotification(text, NSTYLE_INTERNAL_ERR);
 }

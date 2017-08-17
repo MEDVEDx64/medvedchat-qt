@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QLineEdit>
 #include <QTextEdit>
-#include <QListView>
+#include <QListWidget>
 
 #include "client.h"
 
@@ -21,7 +21,7 @@ class MainWindow : public QMainWindow
     QLineEdit *serverAddressWgt;
     QLineEdit *nickNameWgt;
     QTextEdit *chatWgt;
-    QListView *userListWgt;
+    QListWidget *userListWgt;
     QLineEdit *inputWgt;
 
     Client *client;
