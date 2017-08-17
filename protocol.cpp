@@ -32,13 +32,14 @@ QString getPacketText(RawPacket *pkt)
 void setPacketText(RawPacket *pkt, QString text)
 {
     pkt->header.type = PL_TEXT;
+    QByteArray bytes = text.toUtf8();
 
-    const int len = text.length();
+    const int len = bytes.size();
     const int dstLen = sizeof(pkt->payload) - 1;
     const int finalLen = len > dstLen ? dstLen : len;
 
     memset(pkt->payload, 0, dstLen);
-    memcpy(pkt->payload, text.toUtf8().constData(), finalLen);
+    memcpy(pkt->payload, bytes.constData(), finalLen);
 
     pkt->header.length_be = FLIP16(finalLen);
 }
