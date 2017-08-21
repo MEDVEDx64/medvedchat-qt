@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "value.h"
+#include "style.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -83,6 +84,8 @@ void MainWindow::createInterior()
     connect(serverAddressWgt, SIGNAL(returnPressed()), changeHostBtn, SIGNAL(clicked()));
     connect(nickNameWgt, SIGNAL(returnPressed()), changeNickNameBtn, SIGNAL(clicked()));
     connect(inputWgt, &QLineEdit::returnPressed, this, &MainWindow::sendMessage);
+
+    setStyleSheet(STYLE_STR);
 }
 
 void MainWindow::changeHost()

@@ -21,4 +21,5 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     client.h \
     protocol.h \
-    value.h
+    value.h \
+    style.h
