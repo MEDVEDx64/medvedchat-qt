@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "value.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,8 +51,8 @@ void MainWindow::createInterior()
     QPushButton *changeHostBtn = new QPushButton(tr("(Re-)Connect"), subWgt);
     QPushButton *changeNickNameBtn = new QPushButton(tr("Set nickname"), subWgt);
 
-    serverAddressWgt = new QLineEdit("localhost", subWgt);
-    nickNameWgt = new QLineEdit(makeRandomNickName(), subWgt);
+    serverAddressWgt = new QLineEdit(vget_ensure("host", "localhost"), subWgt);
+    nickNameWgt = new QLineEdit(vget_ensure("nickname", makeRandomNickName()), subWgt);
     chatWgt = new QTextEdit(subWgt);
     inputWgt = new QLineEdit(subWgt);
 
@@ -117,6 +118,7 @@ void MainWindow::changeHost()
     connect(client, &Client::disconnected, this, &MainWindow::handleDisconnection);
     connect(client, &Client::error, this, &MainWindow::handleError);
 
+    vset("host", serverAddressWgt->text());
     inputWgt->setFocus();
 }
 
@@ -127,6 +129,7 @@ void MainWindow::changeNickName()
         client->setNickname(nickNameWgt->text());
     }
 
+    vset("nickname", nickNameWgt->text());
     inputWgt->setFocus();
 }
 
